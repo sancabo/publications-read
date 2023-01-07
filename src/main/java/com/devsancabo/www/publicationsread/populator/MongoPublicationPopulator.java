@@ -1,7 +1,6 @@
-package com.devsancabo.www.publicationsread.service;
+package com.devsancabo.www.publicationsread.populator;
 
 import com.devsancabo.www.publicationsread.dto.PublicationDTO;
-import com.devsancabo.www.publicationsread.populator.AbstractPopulator;
 import com.devsancabo.www.publicationsread.populator.inserter.AbstractDataInserter;
 import com.devsancabo.www.publicationsread.populator.inserter.MongoInserter;
 
@@ -10,9 +9,13 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class MongoPublicationPopulator extends AbstractPopulator<PublicationDTO> {
+
+    private static final int AMOUNT_PER_INSERTER = 1000;
+    private static final int TIMEOUT_IN_MILLIS = 1000;
+
     //TODO: Complete
-    public MongoPublicationPopulator(){
-        super(() -> null,p -> p.toString(),100,1000);
+    public MongoPublicationPopulator(Supplier<PublicationDTO> dataProducer, Consumer<PublicationDTO> dataConsoomer){
+        super(dataProducer,dataConsoomer, AMOUNT_PER_INSERTER, TIMEOUT_IN_MILLIS);
     }
     @Override
     public AbstractDataInserter<PublicationDTO> getInserter(Integer amountToInsert,

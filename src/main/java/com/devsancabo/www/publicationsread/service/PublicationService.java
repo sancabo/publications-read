@@ -1,9 +1,11 @@
 package com.devsancabo.www.publicationsread.service;
 
+import com.devsancabo.www.LoremIpsum;
 import com.devsancabo.www.publicationsread.dto.AuthorDTO;
 import com.devsancabo.www.publicationsread.dto.GetPopulatorResponseDTO;
 import com.devsancabo.www.publicationsread.dto.PublicationDTO;
 import com.devsancabo.www.publicationsread.entity.Publication;
+import com.devsancabo.www.publicationsread.populator.MongoPublicationPopulator;
 import com.devsancabo.www.publicationsread.populator.Populator;
 import com.devsancabo.www.publicationsread.populator.PublicationApiException;
 import com.devsancabo.www.publicationsread.repository.PublicationRepository;
@@ -16,6 +18,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class PublicationService {
@@ -26,8 +29,22 @@ public class PublicationService {
     @Autowired
     PublicationService(final PublicationRepository publicationRepository) {
         this.publicationRepository = publicationRepository;
-        this.populator = new MongoPublicationPopulator();
+        this.populator = new MongoPublicationPopulator(() ->
+            PublicationDTO.builder()
+                    .author(AuthorDTO.newAuthor().withUsername(UUID.randomUUID().toString()).
+                            withId(UUID.randomUUID().getLeastSignificantBits()))
+                    .content(LoremIpsum.getRandomSentence(25))
+                    .datetime(LocalDateTime.now())
+                    .build()
+        ,publicationDTO -> {
+            try {
+                createPublication(publicationDTO);
+            }catch(PublicationApiException e){
+                e.printStackTrace();
+            }
+        });
     }
+
 
     public List<PublicationDTO> searchPublications(String userName, LocalDateTime dateTime) throws PublicationApiException {
         logger.info("Search publication[username={},dateTime={}]", userName, dateTime);

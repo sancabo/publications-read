@@ -2,13 +2,16 @@ package com.devsancabo.www.publicationsread.populator.inserter;
 
 import com.devsancabo.www.publicationsread.dto.InserterDTO;
 import com.devsancabo.www.publicationsread.dto.PublicationDTO;
-import com.devsancabo.www.publicationsread.populator.inserter.AbstractDataInserter;
 
+import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class MongoInserter extends AbstractDataInserter<PublicationDTO> {
+
+    private static final int USER_RATIO = 100;
+    private PublicationDTO publication = super.dataProducer.get();
 
     //TODO: Complete
     public MongoInserter(final Supplier<PublicationDTO> dataProducer,
@@ -18,16 +21,28 @@ public class MongoInserter extends AbstractDataInserter<PublicationDTO> {
     }
     @Override
     public Consumer<Supplier<Boolean>> prepareDataForDataSaver() {
-        return null;
+        return dataSaverFunction -> {
+            this.publication = super.dataProducer.get();
+            boolean calledWithError = false;
+            for(int j = 0; j < USER_RATIO && !super.finished && !calledWithError; j++){
+                calledWithError = dataSaverFunction.get();
+            }
+        };
     }
 
     @Override
     public PublicationDTO handleDataForDataSaver() {
-        return null;
+        return this.publication;
     }
 
     @Override
     public InserterDTO getDTORepresentation() {
-        return null;
+        var dto = new InserterDTO();
+        dto.setProperties(new HashMap<>());
+        dto.getProperties().put("userRatio", Integer.toString(USER_RATIO));
+        dto.setInserterClassName(this.getClass().getSimpleName());
+        dto.setDescription(
+                "Inserts Publications. userRatio tells how many times to reuse one user before creating a new one.");
+        return dto;
     }
 }
