@@ -1,6 +1,8 @@
 package com.devsancabo.www.publicationsread.populator.inserter;
 
 import com.devsancabo.www.publicationsread.dto.InserterDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
@@ -12,6 +14,8 @@ import java.util.function.Supplier;
  * @param <T> The type of data that's going to serve as input for the process.
  */
 public abstract class AbstractDataInserter<T> implements Runnable{
+
+    private final Logger logger = LoggerFactory.getLogger(AbstractDataInserter.class);
     private final Integer dataAmount;
     protected final Supplier<T> dataProducer;
     private final Consumer<T> dataPersister;
@@ -93,7 +97,9 @@ public abstract class AbstractDataInserter<T> implements Runnable{
                 prepareDataForDataSaver().accept(dataSaver());
             }
         }
+
         latch.countDown();
         finished = true;
+        logger.info("Stopped inserter: error={}", this.error);
     }
 }

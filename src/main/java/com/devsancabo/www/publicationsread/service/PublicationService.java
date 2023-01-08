@@ -12,6 +12,8 @@ import com.devsancabo.www.publicationsread.repository.PublicationRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -46,12 +48,20 @@ public class PublicationService {
     }
 
 
-    public List<PublicationDTO> searchPublications(String userName, LocalDateTime dateTime) throws PublicationApiException {
+    public List<PublicationDTO> searchPublications(String userName,
+                                                   LocalDateTime dateTime,
+                                                   Integer pageSize,
+                                                   Integer pageNumber) throws PublicationApiException {
         logger.info("Search publication[username={},dateTime={}]", userName, dateTime);
         var realDatetime = dateTime == null ? LocalDateTime.ofInstant(Instant.MIN, ZoneId.of("-03:00")) : dateTime;
         List<Publication> publications;
         try {
-            publications = publicationRepository.findByAuthorNameAndDateTimeGreaterThan(userName, realDatetime);
+            if(pageSize != null && pageNumber != null){
+                publications = publicationRepository.findByAuthorNameAndDateTimeGreaterThan
+                        (userName, realDatetime, PageRequest.of(pageNumber-1,pageSize));
+            } else {
+                publications = publicationRepository.findByAuthorNameAndDateTimeGreaterThan(userName, realDatetime);
+            }
             logger.info("Found publication[username={},dateTime={}]", userName, dateTime);
         } catch (RuntimeException e) {
             e.printStackTrace();

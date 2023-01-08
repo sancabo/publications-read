@@ -1,5 +1,6 @@
 package com.devsancabo.www.publicationsread.populator.inserter;
 
+import com.devsancabo.www.LoremIpsum;
 import com.devsancabo.www.publicationsread.dto.InserterDTO;
 import com.devsancabo.www.publicationsread.dto.PublicationDTO;
 
@@ -14,10 +15,12 @@ public class MongoInserter extends AbstractDataInserter<PublicationDTO> {
     private PublicationDTO publication = super.dataProducer.get();
 
     //TODO: Complete
-    public MongoInserter(final Supplier<PublicationDTO> dataProducer,
+    public MongoInserter(final Integer amountToInsert,
+                         final Supplier<PublicationDTO> dataProducer,
                          final Consumer<PublicationDTO> dataPersister,
-                         final CountDownLatch latch/*, boolean runForever*/){
-        super(100, dataProducer, dataPersister, latch, false);
+                         final CountDownLatch latch,
+                         final Boolean runForever){
+        super(amountToInsert, dataProducer, dataPersister, latch, runForever);
     }
     @Override
     public Consumer<Supplier<Boolean>> prepareDataForDataSaver() {
@@ -32,6 +35,7 @@ public class MongoInserter extends AbstractDataInserter<PublicationDTO> {
 
     @Override
     public PublicationDTO handleDataForDataSaver() {
+        this.publication.setContent(LoremIpsum.getRandomSentence(25));
         return this.publication;
     }
 

@@ -23,6 +23,6 @@ public class MongoPublicationPopulator extends AbstractPopulator<PublicationDTO>
                                                            Consumer<PublicationDTO> dataPersister,
                                                            CountDownLatch latch,
                                                            Boolean runForever) {
-        return new MongoInserter(dataProducer, dataPersister, latch);
+        return new MongoInserter(AMOUNT_PER_INSERTER, dataProducer, dataPersister, latch, runForever);
     }
 }
