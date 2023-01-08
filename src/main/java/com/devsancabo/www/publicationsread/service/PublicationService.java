@@ -1,6 +1,7 @@
 package com.devsancabo.www.publicationsread.service;
 
 import com.devsancabo.www.LoremIpsum;
+import com.devsancabo.www.publicationsread.consumer.PublicationProducer;
 import com.devsancabo.www.publicationsread.dto.AuthorDTO;
 import com.devsancabo.www.publicationsread.dto.GetPopulatorResponseDTO;
 import com.devsancabo.www.publicationsread.dto.PublicationDTO;
@@ -13,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -28,9 +28,13 @@ public class PublicationService {
     private final PublicationRepository publicationRepository;
     private final Populator<PublicationDTO> populator;
 
+    private final PublicationProducer publicationProducer;
+
     @Autowired
-    PublicationService(final PublicationRepository publicationRepository) {
+    PublicationService(final PublicationRepository publicationRepository,
+                       final PublicationProducer publicationProducer) {
         this.publicationRepository = publicationRepository;
+        this.publicationProducer = publicationProducer;
         this.populator = new MongoPublicationPopulator(() ->
             PublicationDTO.builder()
                     .author(AuthorDTO.newAuthor().withUsername(UUID.randomUUID().toString()).
@@ -40,7 +44,7 @@ public class PublicationService {
                     .build()
         ,publicationDTO -> {
             try {
-                createPublication(publicationDTO);
+                createPublicationFromEvent(publicationDTO);
             }catch(PublicationApiException e){
                 e.printStackTrace();
             }
@@ -83,9 +87,14 @@ public class PublicationService {
         return new Publication(publication.getAuthor().getId(),
                 publication.getAuthor().getUsername(), LocalDateTime.now(), publication.getContent());
     }
+    public PublicationDTO createPublication(PublicationDTO publication)  {
+        logger.info("Create Publication {}", publication);
+        publicationProducer.send(publication);
+        return publication;
+    }
 
-    public PublicationDTO createPublication(PublicationDTO publication) throws PublicationApiException {
-        logger.info("Create Publication[username={}]", publication.getAuthor().getUsername());
+    public void createPublicationFromEvent(PublicationDTO publication) throws PublicationApiException {
+        logger.info("Process event - create publication - [{}]", publication);
         Publication createdPublication;
         try {
             createdPublication = publicationRepository.insert(convertToEntity(publication));
@@ -95,7 +104,6 @@ public class PublicationService {
         }
         logger.info("Publication Created[username={}, dateTime={}, id={}]",
                 createdPublication.getAuthorName(), createdPublication.getDateTime(), createdPublication.getAuthorId());
-        return convertToDto(createdPublication);
     }
 
 
