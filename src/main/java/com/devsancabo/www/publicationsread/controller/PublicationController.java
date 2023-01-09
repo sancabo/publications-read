@@ -1,7 +1,7 @@
 package com.devsancabo.www.publicationsread.controller;
 
 import com.devsancabo.www.publicationsread.dto.PublicationDTO;
-import com.devsancabo.www.publicationsread.populator.PublicationApiException;
+import com.devsancabo.www.publicationsread.exception.PublicationApiException;
 import com.devsancabo.www.publicationsread.service.PublicationService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;

@@ -1,7 +1,7 @@
-package com.devsancabo.www.publicationsread.consumer;
+package com.devsancabo.www.publicationsread.event.consumer;
 
 import com.devsancabo.www.publicationsread.dto.PublicationDTO;
-import com.devsancabo.www.publicationsread.populator.PublicationApiException;
+import com.devsancabo.www.publicationsread.exception.PublicationApiException;
 import com.devsancabo.www.publicationsread.service.PublicationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
