@@ -20,7 +20,7 @@ public class PublicationProducerImpl implements PublicationProducer {
     @Override
     public void send(PublicationDTO publicationDTO){
         logger.info("Producing Event: {}", publicationDTO);
-        kafkaTemplate.send("publication-events",publicationDTO);
+        var future = kafkaTemplate.send("publication-events",publicationDTO);
         logger.info("Produced event successfully");
     }
 }
